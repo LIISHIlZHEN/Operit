@@ -1,5 +1,7 @@
 package com.ai.assistance.operit.ui.features.chat.components.style.input.classic
 
+import com.ai.assistance.operit.ui.features.chat.components.TokenUsageHud
+
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
@@ -387,6 +389,12 @@ fun ClassicChatSettingsBar(
 
     // The passed modifier will align this Box within its parent.
     Box(modifier = modifier.padding(end = chatSettingsBarRightMargin.dp)) {
+        TokenUsageHud(
+            chatId = currentChatId,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(end = 40.dp, bottom = 12.dp),
+        )
         IconButton(
             onClick = {
                 showMenu = !showMenu
