@@ -11,6 +11,16 @@ import com.ai.assistance.operit.data.model.MessageEntity
 /** 消息DAO接口，定义对消息表的数据访问方法 */
 @Dao
 interface MessageDao {
+
+    /** 会话级 token 合计：输入 / 输出 / 缓存命中 / 输出耗时（仅统计已完成的 AI 消息） */
+    @Query(
+        "SELECT COALESCE(SUM(inputTokens), 0) AS inputTokens, " +
+            "COALESCE(SUM(outputTokens), 0) AS outputTokens, " +
+            "COALESCE(SUM(cachedInputTokens), 0) AS cachedInputTokens, " +
+            "COALESCE(SUM(outputDurationMs), 0) AS outputDurationMs " +
+            "FROM messages WHERE chatId = :chatId AND sender = 'ai' AND outputTokens > 0"
+    )
+    suspend fun aggregateTokenUsage(chatId: String): TokenUsageAggregate?
     /** 获取消息总数 */
     @Query("SELECT COUNT(*) FROM messages")
     suspend fun getTotalMessageCount(): Int
@@ -243,3 +253,11 @@ interface MessageDao {
     @Query("UPDATE messages SET roleName = :newName WHERE roleName = :oldName")
     suspend fun renameRoleName(oldName: String, newName: String): Int
 }
+
+/** 会话级 token 统计结果（Room 投影） */
+data class TokenUsageAggregate(
+    val inputTokens: Long = 0L,
+    val outputTokens: Long = 0L,
+    val cachedInputTokens: Long = 0L,
+    val outputDurationMs: Long = 0L,
+)
